@@ -1,0 +1,67 @@
+---
+title: "Install mkdb on macOS and Linux"
+description: "Install mkdb using a pre-built binary, Go install, or build from source. Requires Docker and Go 1.21 or later on macOS or Linux."
+sidebarTitle: "Installation"
+---
+
+You can install mkdb in three ways: download a pre-built binary for your platform, install it directly with `go install`, or build it from source. Choose whichever fits your workflow.
+
+## Prerequisites
+
+<Note>
+  Docker must be installed and running before you use mkdb. If you plan to build from source or use `go install`, you also need Go 1.21 or later.
+</Note>
+
+## Install mkdb
+
+<Tabs>
+  <Tab title="Pre-built binary">
+    Pre-built binaries are available for four platforms:
+
+    - `mkdb-linux-amd64` — Linux (x86-64)
+    - `mkdb-linux-arm64` — Linux (ARM64)
+    - `mkdb-darwin-amd64` — macOS (Intel)
+    - `mkdb-darwin-arm64` — macOS (Apple Silicon)
+
+    Download the binary for your platform from the [Releases page](https://github.com/pbzona/mkdb/releases), make it executable, and move it onto your `PATH`. For example, on macOS with Apple Silicon:
+
+    ```bash
+    curl -L https://github.com/pbzona/mkdb/releases/latest/download/mkdb-darwin-arm64 -o mkdb
+    chmod +x mkdb
+    sudo mv mkdb /usr/local/bin/
+    ```
+
+    Replace `mkdb-darwin-arm64` with the filename for your platform if you're on a different system.
+  </Tab>
+  <Tab title="Go install">
+    If you have Go 1.21 or later installed, run:
+
+    ```bash
+    go install github.com/pbzona/mkdb@latest
+    ```
+
+    Go places the binary in `$GOPATH/bin`. Make sure that directory is on your `PATH`.
+  </Tab>
+  <Tab title="Build from source">
+    Clone the repository and build the binary:
+
+    ```bash
+    git clone https://github.com/pbzona/mkdb.git
+    cd mkdb
+    go build -ldflags="-s -w" -o mkdb .
+    sudo mv mkdb /usr/local/bin/
+    ```
+
+    The `-ldflags="-s -w"` flags strip debug symbols, which reduces the binary size by around 30%.
+  </Tab>
+</Tabs>
+
+## Verify the installation
+
+After installing, confirm mkdb is on your `PATH` by checking the version:
+
+```bash
+mkdb --version
+```
+
+If the command prints a version number, mkdb is ready to use.

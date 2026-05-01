@@ -1,0 +1,151 @@
+---
+title: "Manage database credentials with mkdb creds"
+description: "Use mkdb creds get, copy, and rotate to retrieve, clipboard-copy, or regenerate database credentials. Connection strings are env-var formatted."
+sidebarTitle: "creds"
+---
+
+`mkdb creds` provides three subcommands for working with database credentials: `get` to display the connection string, `copy` to put it on your clipboard, and `rotate` to generate a new password and update it in the running database. Connection strings are formatted as environment variables, ready to paste into a `.env` file or shell session.
+
+## mkdb creds get
+
+`mkdb creds get` prints the connection string for the default user of a container. The output is formatted as an environment variable assignment.
+
+### Flags
+
+<ParamField query="--name" type="string">
+  Name of the container. When provided, mkdb skips the interactive selection menu.
+</ParamField>
+
+### Examples
+
+**Interactive mode:**
+
+```bash
+mkdb creds get
+```
+
+**Non-interactive mode:**
+
+```bash
+mkdb creds get --name mydb
+```
+
+**Pipe directly to a `.env` file:**
+
+```bash
+mkdb creds get --name mydb >> .env
+```
+
+**Capture in a variable:**
+
+```bash
+DB_URL=$(mkdb creds get --name mydb)
+```
+
+### Output format
+
+The output is a single line in environment variable format:
+
+```
+DB_URL=postgresql://dbuser:Xy9k2mN8pL4v@localhost:5432/mydb
+```
+
+---
+
+## mkdb creds copy
+
+`mkdb creds copy` copies the connection string to your clipboard instead of printing it. Use this when you want to paste credentials into another tool without the string appearing in your terminal history.
+
+### Flags
+
+<ParamField query="--name" type="string">
+  Name of the container. When provided, mkdb skips the interactive selection menu.
+</ParamField>
+
+### Examples
+
+**Interactive mode:**
+
+```bash
+mkdb creds copy
+```
+
+**Non-interactive mode:**
+
+```bash
+mkdb creds copy --name mydb
+```
+
+---
+
+## mkdb creds rotate
+
+`mkdb creds rotate` generates a new password for the default user, updates it in the running database, and stores the encrypted version. The new connection string is printed after rotation.
+
+### Flags
+
+<ParamField query="--name" type="string">
+  Name of the container. When provided, mkdb skips the interactive selection menu. The container must be running.
+</ParamField>
+
+### Examples
+
+**Interactive mode:**
+
+```bash
+$ mkdb creds rotate
+? Select container: devdb (postgres)
+ℹ Generating new password...
+
+✓ Password rotated successfully!
+
+╭──────────────────────────────────────────────────────────╮
+│ DB_URL=postgresql://dbuser:Bw8m5...@localhost:5432/devdb │
+╰──────────────────────────────────────────────────────────╯
+```
+
+**Non-interactive mode:**
+
+```bash
+mkdb creds rotate --name mydb
+```
+
+<Warning>
+  Databases created with `--no-auth` cannot use `mkdb creds rotate`. Attempting to rotate credentials on an unauthenticated database returns an error.
+</Warning>
+
+---
+
+## Connection string formats
+
+mkdb formats connection strings as environment variables. The exact format depends on the database type and whether authentication is enabled.
+
+**PostgreSQL:**
+
+```bash
+# With authentication
+DB_URL=postgresql://dbuser:<password>@localhost:5432/mydb
+
+# Without authentication (--no-auth)
+DB_URL=postgresql://postgres@localhost:5432/mydb
+```
+
+**MySQL:**
+
+```bash
+# With authentication
+DB_URL=mysql://dbuser:<password>@tcp(localhost:3306)/mydb
+
+# Without authentication (--no-auth)
+DB_URL=mysql://root@tcp(localhost:3306)/mydb
+```
+
+**Redis:**
+
+```bash
+# With authentication
+DB_URL=redis://:<password>@localhost:6379/0
+
+# Without authentication (--no-auth)
+DB_URL=redis://localhost:6379/0
+```

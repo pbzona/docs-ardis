@@ -1,0 +1,173 @@
+---
+title: "mkdb start — create a database container"
+description: "Create a PostgreSQL, MySQL, or Redis container with mkdb start. Supports interactive mode and flag-based automation with TTL, volumes, and auth options."
+sidebarTitle: "start"
+---
+
+`mkdb start` creates and starts a new database container. Run it without any flags to step through an interactive menu, or pass flags directly to skip the prompts — useful in scripts or when you want to recreate a specific setup quickly.
+
+## Flags
+
+<ParamField query="--db" type="string">
+  Database type to create. Accepts `postgres`, `pg`, `postgresql`, `mysql`, `mariadb`, or `redis`.
+</ParamField>
+
+<ParamField query="--name" type="string">
+  Name for the database. Used as the container display name and in the connection string.
+</ParamField>
+
+<ParamField query="--version" type="string">
+  Database image version to use. Defaults to `18` for PostgreSQL, `latest` for MySQL and Redis.
+</ParamField>
+
+<ParamField query="--port" type="string">
+  Host port to bind the container to. If omitted, mkdb uses the database default port and automatically selects the next available port if it is already in use. If you specify a port that is already in use, mkdb returns an error.
+</ParamField>
+
+<ParamField query="--volume" type="string">
+  Volume configuration for the container. Accepts `none` (no persistence), `named` (stores data in `~/.local/share/mkdb/volumes/<name>`), or a custom filesystem path (bind mount). If omitted, mkdb prompts you to choose.
+</ParamField>
+
+<ParamField query="--ttl" type="integer" default="2">
+  Time to live in hours. The container is automatically cleaned up after this many hours. Default is `2`.
+</ParamField>
+
+<ParamField query="--repeat" type="boolean">
+  Reuse the settings from the last database you created. mkdb shows you the saved settings and asks you to confirm before proceeding.
+</ParamField>
+
+<ParamField query="--no-auth" type="boolean">
+  Create the database without a username or password. See [authentication](#authentication) below.
+</ParamField>
+
+## Smart prompting
+
+`mkdb start` only prompts for values you have not already provided via flags. For example, if you pass `--db mysql --name testdb`, mkdb skips the database type and name prompts but still asks about volume configuration and authentication unless you specify those flags too.
+
+## Port handling
+
+When you do not specify `--port`, mkdb uses the database default port (5432 for PostgreSQL, 3306 for MySQL, 6379 for Redis). If that port is already in use, mkdb finds the next available port automatically and prints a notice:
+
+```
+⚠ Default port 5432 is in use, finding next available port...
+ℹ Using port 5433
+```
+
+If you specify `--port` explicitly and that port is already in use, mkdb returns an error and exits. Automatic port selection checks up to 100 ports from the default.
+
+## Authentication
+
+By default, mkdb prompts you to enable authentication. When enabled, it creates a user named `dbuser` with a randomly generated 12-character alphanumeric password and displays the connection string after creation.
+
+To skip the prompt, use `--no-auth` to create the database without a username or password:
+
+```bash
+mkdb start --db postgres --name publicdb --no-auth
+```
+
+<Warning>
+  Databases created with `--no-auth` cannot use `mkdb creds rotate`. Connection strings for unauthenticated databases do not include credentials. Only use this option for local development or testing environments where security is not a concern.
+</Warning>
+
+## Examples
+
+**Interactive mode — prompts for all options:**
+
+```bash
+$ mkdb start
+? Select database type: postgres
+? Enter database name: devdb
+? Enable authentication? (recommended) Yes
+? Do you want to create a volume for this database? named
+
+✓ Database 'devdb' created successfully!
+
+╭──────────────────────────────────────────────────────────╮
+│ DB_URL=postgresql://dbuser:M3kP9xL2vN7w@localhost:5432/devdb │
+╰──────────────────────────────────────────────────────────╯
+
+ℹ Database will expire in 2 hours (at 2025-12-23 17:00:00)
+```
+
+**Fully automated — no prompts:**
+
+```bash
+$ mkdb start --db postgres --name devdb
+ℹ Creating postgres database 'devdb'...
+✓ Database 'devdb' created successfully!
+
+╭──────────────────────────────────────────────────────────╮
+│ DB_URL=postgresql://dbuser:Xy9k2mN8pL4v@localhost:5432/devdb │
+╰──────────────────────────────────────────────────────────╯
+
+ℹ Database will expire in 2 hours (at 2025-12-23 17:00:00)
+ℹ Use 'mkdb start --repeat' to quickly create another database with the same settings
+```
+
+**Partial flags — prompts only for what is missing:**
+
+```bash
+mkdb start --db mysql --name testdb
+```
+
+**Custom TTL — expire in 48 hours instead of the default 2:**
+
+```bash
+$ mkdb start --db postgres --name devdb --ttl 48
+ℹ Creating postgres database 'devdb'...
+✓ Database 'devdb' created successfully!
+
+╭──────────────────────────────────────────────────────────╮
+│ DB_URL=postgresql://dbuser:Bw7n5pK2mL9t@localhost:5432/devdb │
+╰──────────────────────────────────────────────────────────╯
+
+ℹ Database will expire in 48 hours (at 2025-12-25 17:00:00)
+```
+
+**Repeat last settings:**
+
+```bash
+$ mkdb start --repeat
+ℹ Using previous settings: postgres database 'devdb'
+? Continue with these settings? Yes
+
+ℹ Creating postgres database 'devdb'...
+✓ Database 'devdb' created successfully!
+```
+
+**Volume options:**
+
+```bash
+# No persistent storage — data is lost when the container is removed
+mkdb start --db redis --name cache --volume none
+
+# Named volume stored in ~/.local/share/mkdb/volumes/<name>
+mkdb start --db postgres --name mydb --volume named
+
+# Custom bind-mount path
+mkdb start --db redis --name cache --volume /data/redis
+```
+
+**No authentication:**
+
+```bash
+# PostgreSQL without authentication (trust mode)
+mkdb start --db postgres --name devdb --no-auth
+
+# MySQL without authentication (root login without password)
+mkdb start --db mysql --name devdb --no-auth
+
+# Redis without authentication (no requirepass)
+mkdb start --db redis --name cache --no-auth
+```
+
+## Default credentials
+
+When authentication is enabled, mkdb creates the following default user:
+
+| Field    | Value                                   |
+| -------- | --------------------------------------- |
+| Username | `dbuser`                                |
+| Password | Randomly generated 12-character string  |
+
+The password is displayed once after creation and stored encrypted using AES-256-GCM. Retrieve it any time with [`mkdb creds get`](/commands/creds).

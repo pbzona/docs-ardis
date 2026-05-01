@@ -1,0 +1,66 @@
+---
+title: "Manage database users with mkdb user"
+description: "Create and delete additional database users with mkdb user create and mkdb user delete. Each user gets a generated password and connection string."
+sidebarTitle: "users"
+---
+
+`mkdb user` lets you create and delete additional database users beyond the default `dbuser` account. This is useful when you want to give an application its own dedicated credentials, or when you need to test permission-based access within a local container.
+
+## mkdb user create
+
+`mkdb user create` adds a new user to a running database container. mkdb prompts you for a username, generates a password, creates the user in the database, and prints the connection string.
+
+### Flags
+
+<ParamField query="--name" type="string">
+  Name of the container to add the user to. When provided, mkdb skips the interactive container selection menu. The container must be running.
+</ParamField>
+
+### Example
+
+```bash
+$ mkdb user create
+? Select container: devdb (postgres)
+? Enter username: appuser
+ℹ Generating password...
+
+✓ User 'appuser' created successfully!
+
+╭────────────────────────────────────────────────────────────╮
+│ DB_URL=postgresql://appuser:Xy9k2...@localhost:5432/devdb │
+╰────────────────────────────────────────────────────────────╯
+```
+
+**Non-interactive container selection:**
+
+```bash
+mkdb user create --name mydb
+```
+
+After selecting the container, mkdb still prompts for the username.
+
+---
+
+## mkdb user delete
+
+`mkdb user delete` removes a non-default user from a running database container. mkdb presents a list of deletable users and asks you to confirm before removing the account.
+
+### Flags
+
+<ParamField query="--name" type="string">
+  Name of the container to delete the user from. When provided, mkdb skips the interactive container selection menu. The container must be running.
+</ParamField>
+
+### Example
+
+```bash
+# Interactive mode
+mkdb user delete
+
+# Non-interactive container selection
+mkdb user delete --name mydb
+```
+
+<Note>
+  The default user (`dbuser`) cannot be deleted with `mkdb user delete`. Only users created with `mkdb user create` are available for deletion. To remove a database and all its users entirely, use `mkdb remove`.
+</Note>

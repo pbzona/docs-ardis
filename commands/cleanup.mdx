@@ -1,0 +1,35 @@
+---
+title: "Clean up expired containers with mkdb cleanup"
+description: "mkdb cleanup removes expired database containers and their volumes. It also runs automatically before every other mkdb command you execute."
+sidebarTitle: "cleanup"
+---
+
+`mkdb cleanup` finds all database containers whose TTL has expired and lets you remove them interactively. When you confirm a removal, mkdb stops and deletes the Docker container, removes the associated volume, and clears the container record from its local database.
+
+## Automatic cleanup
+
+You do not need to run `mkdb cleanup` manually on a regular basis. mkdb runs a cleanup check automatically before every command. If expired containers exist when you run `mkdb list`, `mkdb start`, or any other command, mkdb detects them and prompts you to remove them as part of that operation.
+
+## Manual cleanup
+
+Run `mkdb cleanup` directly when you want to explicitly audit and remove expired containers:
+
+```bash
+mkdb cleanup
+```
+
+mkdb lists all expired containers and presents an interactive prompt where you select which ones to remove. Containers you do not select are left in place.
+
+## What gets deleted
+
+When you confirm removal of a container, mkdb deletes:
+
+- The Docker container
+- The associated volume (named volume or bind-mount data)
+- The container record and user records from the local mkdb database
+
+This operation is permanent and cannot be undone.
+
+<Note>
+  **Testing connectivity:** To verify that a container is reachable before or after other operations, use `mkdb test --name mydb` (also available as `mkdb ping --name mydb`). This runs a simple query against the database — `SELECT 1` for PostgreSQL and MySQL, `PING` for Redis — and reports whether the connection succeeded.
+</Note>

@@ -1,0 +1,43 @@
+---
+title: "Extend container lifetime with mkdb extend"
+description: "Use mkdb extend to add hours to a container's TTL and prevent automatic cleanup. Specify --hours to extend by more than the default one hour."
+sidebarTitle: "extend"
+---
+
+`mkdb extend` adds time to a container's TTL (time to live), pushing back the expiration date and preventing automatic cleanup. Use it when you need to keep a database running longer than its original TTL allows — for example, if you are in the middle of a longer development session or debugging an issue that will take more time than expected.
+
+## Flags
+
+<ParamField query="--name" type="string">
+  Name of the container to extend. When provided, mkdb skips the interactive selection menu.
+</ParamField>
+
+<ParamField query="--hours" type="integer" default="1">
+  Number of hours to add to the container's current expiration time. Defaults to `1`. If the container is already expired, mkdb extends from the current time rather than the original expiration date.
+</ParamField>
+
+## Examples
+
+**Interactive mode — extend by 1 hour:**
+
+```bash
+mkdb extend
+```
+
+**Non-interactive mode — extend a named container by 1 hour:**
+
+```bash
+mkdb extend --name mydb
+```
+
+**Extend by a custom number of hours:**
+
+```bash
+$ mkdb extend --name devdb --hours 24
+✓ Container 'devdb' TTL extended by 24 hours!
+ℹ New expiration: 2025-12-26 15:00:00
+```
+
+<Tip>
+  For more about how TTL works and how to set a longer initial TTL at creation time, see [TTL configuration](/configuration/ttl).
+</Tip>

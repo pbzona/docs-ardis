@@ -1,0 +1,43 @@
+---
+title: "mkdb info — inspect a database container"
+description: "Display detailed information about a mkdb container: type, version, status, port, creation date, expiration, TTL remaining, and volume details."
+sidebarTitle: "info"
+---
+
+`mkdb info` displays a detailed summary of a single database container. Use it to check the current status, see exactly when the container will expire, or confirm its volume configuration — without having to inspect Docker directly.
+
+## What mkdb info displays
+
+Running `mkdb info` shows the following details about the selected container:
+
+- **Database type and version** — for example, `postgres 18` or `redis latest`
+- **Status** — `running`, `stopped`, or `expired`
+- **Port** — the host port the container is bound to
+- **Created date** — when the container was first started
+- **Expiration date** — when the TTL runs out and the container becomes eligible for cleanup
+- **Time remaining** — how long until the container expires
+- **Volume information** — volume type (`none`, `named`, or `bind`) and the path or name of the volume
+
+## Flags
+
+<ParamField query="--name" type="string">
+  Name of the container to inspect. When provided, mkdb skips the interactive selection menu and displays information for the named container directly.
+</ParamField>
+
+## Examples
+
+**Interactive mode — select from a list of containers:**
+
+```bash
+mkdb info
+```
+
+**Non-interactive mode — inspect a named container directly:**
+
+```bash
+mkdb info --name mydb
+```
+
+<Tip>
+  When a container is running, `mkdb info` retrieves the actual database version from the running container rather than just the image tag. This means you see the precise version string (for example, `15.4`) rather than `latest`.
+</Tip>

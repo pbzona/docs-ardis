@@ -1,0 +1,57 @@
+---
+title: "Database volume options in mkdb"
+description: "Choose between no persistence, a named volume, or a custom bind-mount path when creating a database. Volumes are preserved on stop and removed on cleanup."
+sidebarTitle: "Volumes"
+---
+
+When you create a database with `mkdb start`, mkdb asks how you want to handle storage for that container. You have three options: no persistent storage, a named volume managed by mkdb, or a custom path on your filesystem. Your choice determines where data lives, how long it survives, and who controls it.
+
+## Volume options
+
+### None (`--volume none`)
+
+With no volume, the container has no persistent storage. Data exists only while the container is running. As soon as you remove the container — whether manually with `mkdb rm` or automatically when the TTL expires — all data is gone.
+
+Use this option for throwaway test databases where you do not need the data after the session ends.
+
+```bash
+mkdb start --db redis --name cache --volume none
+```
+
+<Warning>
+  Data stored in a container with `--volume none` is permanently lost when the container is removed or expires. There is no recovery path.
+</Warning>
+
+### Named (`--volume named`)
+
+A named volume is a directory that mkdb creates and manages for you at `~/.local/share/mkdb/volumes/<name>`. The volume persists across stops and restarts, so your data is safe when you run `mkdb stop` and restored when you run `mkdb restart`.
+
+```bash
+mkdb start --db postgres --name mydb --volume named
+```
+
+<Tip>
+  Use named volumes for databases you plan to stop and restart regularly. mkdb tracks the volume path in its database, so you never need to remember where the data is stored.
+</Tip>
+
+### Custom path (`--volume /path/to/dir`)
+
+A custom path bind-mounts any directory on your filesystem into the container. You supply the absolute path, and mkdb creates the directory if it does not already exist. This gives you full control over where data is stored — useful for placing data on a specific disk or sharing it with other tools.
+
+```bash
+mkdb start --db postgres --name mydb --volume /data/mydb
+```
+
+## Volume lifecycle
+
+| Event | What happens to the volume |
+|---|---|
+| `mkdb start` | Volume directory is created |
+| `mkdb stop` | Container stops; volume is preserved |
+| `mkdb restart` | Container restarts with existing volume |
+| `mkdb rm` | Container and volume are permanently deleted |
+| TTL expiry / `mkdb cleanup` | Container and volume are permanently deleted |
+
+<Warning>
+  When a container expires due to TTL or is removed via `mkdb cleanup`, its volume is deleted permanently along with all data it contains. Run `mkdb extend` before expiry if you need to keep the data.
+</Warning>

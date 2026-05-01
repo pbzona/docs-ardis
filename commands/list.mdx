@@ -1,0 +1,65 @@
+---
+title: "mkdb list — view all database containers"
+description: "List all local database containers managed by mkdb in a formatted table. Filter by database type or running status. Short alias: mkdb ls."
+sidebarTitle: "list"
+---
+
+`mkdb list` displays all database containers that mkdb manages, in a formatted table with their current status and time remaining. Use it to get a quick overview of what is running, stopped, or about to expire. The command has a shorter alias, `mkdb ls`, that works identically.
+
+## Flags
+
+<ParamField query="--type" type="string">
+  Filter the output to a specific database type. Accepts `postgres`, `pg`, `mysql`, or `redis`.
+</ParamField>
+
+<ParamField query="--status" type="string">
+  Filter the output by container status. Accepts `running` or `up`, `stopped` or `down`, and `expired`.
+</ParamField>
+
+## Output columns
+
+The table includes the following columns for each container:
+
+| Column        | Description                                              |
+| ------------- | -------------------------------------------------------- |
+| Name          | The display name you gave the database at creation       |
+| Type          | Database type: `postgres`, `mysql`, or `redis`           |
+| Status        | Current status: `running`, `stopped`, or `expired`       |
+| Port          | Host port the container is bound to                      |
+| TTL remaining | Time left before the container expires and is cleaned up |
+
+## Examples
+
+**List all containers:**
+
+```bash
+mkdb list
+```
+
+**Use the shorter alias:**
+
+```bash
+mkdb ls
+```
+
+**Filter by database type:**
+
+```bash
+mkdb ls --type postgres
+```
+
+**Filter by status:**
+
+```bash
+mkdb ls --status running
+```
+
+**Combine filters:**
+
+```bash
+mkdb ls --type redis --status running
+```
+
+<Note>
+  `mkdb list` and `mkdb ls` are identical. The short alias is convenient for quick checks during development.
+</Note>

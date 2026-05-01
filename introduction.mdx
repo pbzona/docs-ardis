@@ -1,0 +1,50 @@
+---
+title: "mkdb: manage local database dev containers"
+description: "mkdb is a CLI tool that creates and manages local Docker containers for PostgreSQL, MySQL, and Redis. Built for development workflows."
+sidebarTitle: "Introduction"
+---
+
+mkdb is a CLI tool that wraps Docker to create and manage local database containers for development. This page covers what mkdb does, the databases it supports, its key capabilities, and how containers move through their lifecycle.
+
+## What mkdb does
+
+Setting up a local database for development typically means installing a database server, configuring it, and remembering to clean it up when you're done. mkdb replaces that process with a single command. It starts a Docker container with sensible defaults, generates encrypted credentials, and removes the container automatically when it expires — so you can focus on building instead of managing infrastructure.
+
+## Supported databases
+
+mkdb supports three database types, each with a default version and port:
+
+| Database   | Default version | Default port |
+| ---------- | --------------- | ------------ |
+| PostgreSQL | 18              | 5432         |
+| MySQL      | latest          | 3306         |
+| Redis      | latest          | 6379         |
+
+If the default port is already in use, mkdb automatically selects the next available port. You can also override the version and port with flags when creating a container.
+
+## Key features
+
+- **Interactive and flag-based usage** — run `mkdb start` to follow prompts, or pass `--db`, `--name`, and other flags to skip them entirely and script your setup
+- **Auto-TTL cleanup** — containers expire after 2 hours by default; adjust the TTL at creation time with `--ttl` or extend it later with `mkdb extend`
+- **Encrypted credentials** — passwords are stored using AES-256-GCM; retrieve or copy your connection string at any time with `mkdb creds get` or `mkdb creds copy`
+- **Volume management** — choose no persistence, a named volume stored in `~/.local/share/mkdb/volumes/`, or a custom bind-mount path
+- **Connection string generation** — mkdb prints a ready-to-use `DB_URL` in environment variable format after every `start`
+- **User management** — create and delete additional database users with `mkdb user create` and `mkdb user delete`
+
+## Container lifecycle
+
+mkdb containers follow a straightforward lifecycle:
+
+1. **Start** — `mkdb start` creates the container and its volume, then prints the connection string
+2. **Stop / restart** — `mkdb stop` stops the container while preserving its data; `mkdb restart` brings it back up
+3. **Remove** — `mkdb remove` permanently deletes the container and its volume
+4. **Automatic cleanup** — when a container's TTL expires, mkdb removes it and its volume the next time any mkdb command runs; you can also trigger this manually with `mkdb cleanup`
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install mkdb on macOS or Linux using a pre-built binary, Go install, or build from source.
+  </Card>
+  <Card title="Quick start" icon="bolt" href="/quickstart">
+    Create your first database container and get a connection string in three steps.
+  </Card>
+</CardGroup>

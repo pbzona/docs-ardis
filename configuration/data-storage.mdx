@@ -1,0 +1,61 @@
+---
+title: "How mkdb stores data on your machine"
+description: "mkdb stores container records, logs, credentials, and config files under ~/.local/share/mkdb. Learn what each file does and how to find it."
+sidebarTitle: "Data Storage"
+---
+
+mkdb writes all of its persistent state to a single directory on your machine. By default, that directory is `~/.local/share/mkdb`, which follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/latest/). Every database you create, every log entry, every stored credential, and every configuration file lives somewhere inside this directory. Understanding the layout helps you locate files, back up data, or troubleshoot problems.
+
+## Directory layout
+
+```text
+~/.local/share/mkdb/
+├── mkdb.db              # SQLite database tracking containers
+├── mkdb.log             # Application logs
+├── last_settings.json   # Last used settings for --repeat
+├── .encryption.key      # Encryption key for passwords
+├── configs/             # Database configuration files
+│   ├── mydb/
+│   │   └── postgresql.conf
+│   └── cache/
+│       └── redis.conf
+└── volumes/             # Named volumes storage
+    └── mydb/            # Example named volume
+```
+
+## Files and directories
+
+**`mkdb.db`** — A SQLite database that tracks every container mkdb has created. It stores the container name, type, version, port, status, TTL, volume path, and user credentials. mkdb reads and writes this file on every command.
+
+**`mkdb.log`** — The application log file. mkdb appends structured log entries here as it runs. Check this file when debugging unexpected behavior.
+
+**`last_settings.json`** — A JSON file that stores the settings from the most recently created database. mkdb reads this file when you run `mkdb start --repeat` to pre-fill your previous choices.
+
+**`.encryption.key`** — A 256-bit AES key used to encrypt and decrypt stored passwords. mkdb generates this file automatically the first time it runs.
+
+<Note>
+  Do not delete `.encryption.key`. If it is missing or replaced, mkdb cannot decrypt the passwords stored in `mkdb.db`, and credential retrieval will fail for all existing containers.
+</Note>
+
+**`configs/`** — Contains one subdirectory per database container. Each subdirectory holds the database-specific configuration file mounted into the container at startup.
+
+**`volumes/`** — Contains the data directories for containers created with `--volume named`. Each named volume is stored as a subdirectory here, named after the database.
+
+## Configuration files
+
+When you create a database, mkdb generates a default configuration file and stores it under `configs/<name>/`. The file name depends on the database type:
+
+- **PostgreSQL**: `postgresql.conf`
+- **MySQL**: `my.cnf`
+- **Redis**: `redis.conf`
+
+You can edit these files at any time using `mkdb config`, which opens the file in your `$EDITOR`. Changes take effect after you restart the container:
+
+```bash
+mkdb config
+mkdb restart --name mydb
+```
+
+## XDG_DATA_HOME
+
+If you set the `XDG_DATA_HOME` environment variable, mkdb uses that path as the base data directory instead of `~/.local/share`. For example, setting `XDG_DATA_HOME=/opt/data` causes mkdb to store everything under `/opt/data/mkdb/`.

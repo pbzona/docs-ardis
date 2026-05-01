@@ -1,0 +1,46 @@
+---
+title: "mkdb: local database containers for developers"
+description: "mkdb is a CLI tool for spinning up PostgreSQL, MySQL, and Redis containers locally. Create, manage, and clean up dev databases in seconds."
+---
+
+mkdb gives you a fast, frictionless way to create local database containers for development. With a single command, spin up PostgreSQL, MySQL, or Redis — complete with auto-generated connection strings, encrypted credentials, and automatic cleanup when you're done.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install mkdb on macOS or Linux in under a minute using pre-built binaries or Go.
+  </Card>
+  <Card title="Quick Start" icon="bolt" href="/quickstart">
+    Create your first database container and get a connection string in three steps.
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/start">
+    Full reference for every mkdb command — flags, examples, and expected output.
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/data-storage">
+    Understand how mkdb stores data, manages volumes, and handles TTL expiration.
+  </Card>
+</CardGroup>
+
+## What mkdb does
+
+mkdb wraps Docker to manage short-lived or long-lived database containers for local development. You get:
+
+- **One command to start** — `mkdb start` prompts for what it needs, or accepts flags for scripting
+- **Three database types** — PostgreSQL, MySQL, and Redis, each with sensible defaults
+- **Auto-expiring containers** — containers are cleaned up automatically after their TTL expires (default: 2 hours)
+- **Encrypted credentials** — passwords are stored with AES-256-GCM and connection strings are ready to paste into `.env` files
+- **Volume flexibility** — choose no persistence, a named volume, or a custom bind-mount path
+
+<Steps>
+  <Step title="Install mkdb">
+    Download a pre-built binary for your platform or install with `go install github.com/pbzona/mkdb@latest`.
+  </Step>
+  <Step title="Create a database">
+    Run `mkdb start` and follow the prompts — or pass `--db`, `--name`, and other flags to skip them.
+  </Step>
+  <Step title="Connect to your database">
+    Copy the printed `DB_URL` into your app's environment. Run `mkdb creds get --name mydb` any time to retrieve it again.
+  </Step>
+  <Step title="Clean up when done">
+    Run `mkdb rm --name mydb` to remove the container and its volume, or let the TTL handle it automatically.
+  </Step>
+</Steps>

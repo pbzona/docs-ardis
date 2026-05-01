@@ -1,0 +1,154 @@
+---
+title: "Get started with mkdb in minutes"
+description: "Create your first local database container with mkdb. Spin up PostgreSQL, MySQL, or Redis, get a connection string, and start developing in under five minutes."
+sidebarTitle: "Quick Start"
+---
+
+This quickstart walks you through creating a local database container, retrieving its connection string, and verifying that the database is ready to accept connections. By the end, you will have a running PostgreSQL, MySQL, or Redis container and a `DB_URL` you can drop straight into your project.
+
+<Steps>
+  <Step title="Create your first database">
+    Run `mkdb start` to launch the interactive setup. mkdb prompts you for the database type, a name, authentication preference, and volume option:
+
+    ```bash
+    mkdb start
+    ```
+
+    Follow the prompts:
+
+    ```
+    ? Select database type: postgres
+    ? Enter database name: devdb
+    ? Enable authentication? (recommended) Yes
+    ? Do you want to create a volume for this database? named
+    ```
+
+    After mkdb pulls the image and starts the container, it prints your connection string and expiry time:
+
+    ```
+    ✓ Database 'devdb' created successfully!
+
+    ╭──────────────────────────────────────────────────────────╮
+    │ DB_URL=postgresql://dbuser:M3kP9xL2vN7w@localhost:5432/devdb │
+    ╰──────────────────────────────────────────────────────────╯
+
+    ℹ Database will expire in 2 hours (at 2025-12-23 17:00:00)
+    ℹ Use 'mkdb start --repeat' to quickly create another database with the same settings
+    ```
+
+    If you already know what you want, skip the prompts with flags:
+
+    ```bash
+    mkdb start --db postgres --name mydb
+    ```
+  </Step>
+
+  <Step title="Save your connection string">
+    Retrieve your connection string at any time with `mkdb creds get`:
+
+    ```bash
+    mkdb creds get --name mydb
+    ```
+
+    Output:
+
+    ```
+    DB_URL=postgresql://dbuser:Xy9k2mN8pL4v@localhost:5432/mydb
+    ```
+
+    Append it directly to your `.env` file:
+
+    ```bash
+    mkdb creds get --name mydb >> .env
+    ```
+
+    Or copy it to your clipboard:
+
+    ```bash
+    mkdb creds copy --name mydb
+    ```
+  </Step>
+
+  <Step title="Verify the connection">
+    Confirm the database is reachable by running a test query:
+
+    ```bash
+    mkdb test --name mydb
+    ```
+
+    You can also use the `ping` alias:
+
+    ```bash
+    mkdb ping --name mydb
+    ```
+
+    mkdb runs a lightweight query against the container and displays the result. For PostgreSQL it executes `SELECT 1 as status, current_user, current_database();`, and for Redis it sends a `PING` command.
+  </Step>
+
+  <Step title="List your databases">
+    See all containers mkdb is tracking:
+
+    ```bash
+    mkdb list
+    ```
+
+    Or use the shorter alias:
+
+    ```bash
+    mkdb ls
+    ```
+
+    The output is a formatted table with the following columns:
+
+    | Column | Description |
+    |--------|-------------|
+    | Name | Container name you assigned at creation |
+    | Type | Database engine: `postgres`, `mysql`, or `redis` |
+    | Status | Current state: `running`, `stopped`, or `expired` |
+    | Port | Host port the container is bound to |
+    | TTL remaining | Time left before automatic cleanup |
+
+    Filter by type or status when you have many containers:
+
+    ```bash
+    mkdb ls --type postgres --status running
+    ```
+  </Step>
+
+  <Step title="Stop or remove the database">
+    **Stop** the container to pause it and preserve all data on disk:
+
+    ```bash
+    mkdb stop --name mydb
+    ```
+
+    You can restart it later with `mkdb restart --name mydb`.
+
+    **Remove** the container when you no longer need it. This permanently deletes the container and its volume:
+
+    ```bash
+    mkdb rm --name mydb
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  Containers expire after **2 hours** by default. When a container expires, mkdb stops and removes it along with its volume. To set a longer lifetime, pass `--ttl` when you create the database — for example, `mkdb start --db postgres --name mydb --ttl 48` keeps the container alive for 48 hours. You can also extend an existing container's lifetime with `mkdb extend --name mydb --hours 24`.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="All start flags" href="/commands/start">
+    Explore every option available when creating a database container.
+  </Card>
+  <Card title="Manage TTL" href="/configuration/ttl">
+    Configure default lifetimes and extend containers before they expire.
+  </Card>
+  <Card title="Volume options" href="/configuration/volumes">
+    Choose between named volumes, custom paths, or no persistence.
+  </Card>
+  <Card title="Credentials" href="/commands/creds">
+    Retrieve, copy, and rotate connection strings and passwords.
+  </Card>
+</CardGroup>

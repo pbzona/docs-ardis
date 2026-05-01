@@ -1,0 +1,134 @@
+---
+title: "Troubleshooting common mkdb issues"
+description: "Fixes for the most common mkdb errors: Docker not running, port conflicts, container name collisions, volume permission errors, and credential issues."
+sidebarTitle: "Troubleshooting"
+---
+
+This page covers the most common issues you might encounter when using mkdb. Most problems are related to Docker availability, port availability, or container name conflicts.
+
+<AccordionGroup>
+  <Accordion title="Docker daemon not running">
+    If mkdb cannot connect to Docker, you'll see:
+
+    ```
+    Error: failed to connect to Docker daemon
+    ```
+
+    Start Docker Desktop, or if you're running Docker Engine directly, ensure the daemon is active. You can verify Docker is running with:
+
+    ```bash
+    docker info
+    ```
+
+    If the command returns an error, start Docker before retrying your mkdb command.
+  </Accordion>
+
+  <Accordion title="Port already in use (default port)">
+    When you run `mkdb start` without `--port` and the default port is occupied, mkdb automatically selects the next available port. You'll see a warning like:
+
+    ```
+    ⚠ Default port 5432 is in use, finding next available port...
+    ℹ Using port 5433
+    ```
+
+    <Note>
+      No action is required. mkdb handles this automatically, checking up to 100 ports from the default.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Port already in use (explicit --port)">
+    If you pass `--port` with a value that is already in use, mkdb returns an error instead of selecting a different port:
+
+    ```
+    Error: port 5433 is already in use (use default port for automatic selection)
+    ```
+
+    Either omit `--port` to let mkdb choose an available port automatically, or specify a different port:
+
+    ```bash
+    # Let mkdb find an available port automatically
+    mkdb start
+
+    # Or specify a different port explicitly
+    mkdb start --port 5434
+    ```
+  </Accordion>
+
+  <Accordion title="Container name already exists">
+    If a container with the name you specified already exists, mkdb returns:
+
+    ```
+    Error: container with name 'mydb' already exists
+    ```
+
+    Choose a different name, or remove the existing container first:
+
+    ```bash
+    mkdb rm --name mydb
+    ```
+
+    <Warning>
+      Removing a container permanently deletes the container and its volume. Make sure you no longer need the data before running `mkdb rm`.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Permission denied on volume path">
+    When mkdb cannot create the volume directory at the path you specified, you'll see:
+
+    ```
+    Error: failed to create volume directory
+    ```
+
+    Ensure you have write permissions to the path you passed to `--volume`. Alternatively, use a named volume, which mkdb manages for you under `~/.local/share/mkdb/volumes/`:
+
+    ```bash
+    mkdb start --volume named
+    ```
+  </Accordion>
+
+  <Accordion title="Credentials not found on unauthenticated database">
+    If you run `mkdb creds rotate` on a database that was created with `--no-auth`, the command will fail. Unauthenticated databases do not store credentials and do not support password rotation.
+
+    Use `mkdb creds get` to confirm whether credentials exist for the container:
+
+    ```bash
+    mkdb creds get --name mydb
+    ```
+
+    If no credentials are returned, the database was created without authentication. To use credential management, recreate the database with authentication enabled:
+
+    ```bash
+    mkdb start --db postgres --name mydb
+    ```
+
+    When prompted, confirm that you want to enable authentication. Omit `--no-auth` to ensure credentials are generated and stored.
+  </Accordion>
+
+  <Accordion title="Container missing after system restart">
+    mkdb containers have a TTL (time to live) and are automatically removed when they expire. The default TTL is 2 hours. If you restart your machine or come back to a session after some time, the container may have been cleaned up.
+
+    Check your current containers with:
+
+    ```bash
+    mkdb ls
+    ```
+
+    To prevent future expiry, extend the TTL of a running container before it expires:
+
+    ```bash
+    mkdb extend --name mydb --hours 24
+    ```
+
+    When creating a new container, set a longer TTL upfront:
+
+    ```bash
+    mkdb start --db postgres --name mydb --ttl 168
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Getting more help
+
+- **Logs**: Check `~/.local/share/mkdb/mkdb.log` for detailed output from recent mkdb commands.
+- **Issues**: File a bug report or feature request at [github.com/pbzona/mkdb/issues](https://github.com/pbzona/mkdb/issues).
+- **Flag reference**: Run `mkdb --help` or `mkdb <command> --help` to see all available flags for any command.

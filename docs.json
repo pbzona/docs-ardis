@@ -1,0 +1,65 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "aspen",
+  "name": "mkdb",
+  "colors": {
+    "primary": "#040404",
+    "light": "#ffffff"
+  },
+  "favicon": "https://media.brand.dev/70dde274-e5b7-4cf0-9624-03f883390baf.png",
+  "logo": {
+    "light": "https://media.brand.dev/9457ad5f-5721-4f8f-9a21-5c2e046625f6.svg",
+    "dark": "https://media.brand.dev/9457ad5f-5721-4f8f-9a21-5c2e046625f6.svg"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/pbzona/mkdb"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "commands/start",
+              "commands/list",
+              "commands/stop-restart",
+              "commands/info",
+              "commands/creds",
+              "commands/users",
+              "commands/extend",
+              "commands/cleanup"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/data-storage",
+              "configuration/volumes",
+              "configuration/ttl",
+              "configuration/connection-strings"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

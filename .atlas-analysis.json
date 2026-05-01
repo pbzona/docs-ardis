@@ -1,0 +1,83 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "mkdb",
+  "projectDescription": "A CLI tool for creating and managing local Docker database containers for development environments.",
+  "theme": "aspen",
+  "primaryColor": "#040404",
+  "lightColor": "#ffffff",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "commands/start",
+              "commands/list",
+              "commands/stop-restart",
+              "commands/info",
+              "commands/creds",
+              "commands/users",
+              "commands/extend",
+              "commands/cleanup"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/data-storage",
+              "configuration/volumes",
+              "configuration/ttl",
+              "configuration/connection-strings"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Create PostgreSQL, MySQL, and Redis containers with a single command",
+    "Interactive menus with vim keybindings or fully non-interactive with flags",
+    "Automatic TTL-based container cleanup (default 2 hours, configurable)",
+    "Encrypted credential storage using AES-256-GCM",
+    "Auto-generated connection strings in environment variable format",
+    "Named and custom volume management with automatic creation",
+    "Additional database user management",
+    "Automatic port conflict resolution",
+    "One-command credential rotation"
+  ],
+  "publicApiSurface": [
+    "mkdb start [--db] [--name] [--version] [--port] [--volume] [--ttl] [--repeat] [--no-auth]",
+    "mkdb list / mkdb ls [--type] [--status]",
+    "mkdb stop [--name]",
+    "mkdb restart [--name]",
+    "mkdb info [--name]",
+    "mkdb remove / mkdb rm [--name]",
+    "mkdb creds get [--name]",
+    "mkdb creds copy [--name]",
+    "mkdb creds rotate [--name]",
+    "mkdb user create [--name]",
+    "mkdb user delete [--name]",
+    "mkdb extend [--name] [--hours]",
+    "mkdb test / mkdb ping [--name]",
+    "mkdb config",
+    "mkdb cleanup",
+    "mkdb version"
+  ]
+}

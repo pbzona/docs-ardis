@@ -1,0 +1,83 @@
+---
+title: "Database connection string formats in mkdb"
+description: "mkdb generates environment-variable formatted connection strings for PostgreSQL, MySQL, and Redis. Learn the format and how to retrieve or rotate credentials."
+sidebarTitle: "Connection Strings"
+---
+
+When you create a database, mkdb generates a connection string in environment variable format and prints it immediately after creation. The string is ready to paste directly into a `.env` file or use in a shell script. You can also retrieve it at any time using the `mkdb creds` commands.
+
+## Connection string formats
+
+<Tabs>
+  <Tab title="PostgreSQL">
+    With authentication:
+    ```bash
+    DB_URL=postgresql://dbuser:<password>@localhost:5432/mydb
+    ```
+
+    Without authentication (`--no-auth`):
+    ```bash
+    DB_URL=postgresql://postgres@localhost:5432/mydb
+    ```
+  </Tab>
+  <Tab title="MySQL">
+    With authentication:
+    ```bash
+    DB_URL=mysql://dbuser:<password>@tcp(localhost:3306)/mydb
+    ```
+
+    Without authentication (`--no-auth`):
+    ```bash
+    DB_URL=mysql://root@tcp(localhost:3306)/mydb
+    ```
+  </Tab>
+  <Tab title="Redis">
+    With authentication:
+    ```bash
+    DB_URL=redis://:<password>@localhost:6379/0
+    ```
+
+    Without authentication (`--no-auth`):
+    ```bash
+    DB_URL=redis://localhost:6379/0
+    ```
+  </Tab>
+</Tabs>
+
+## Retrieving your connection string
+
+Print the connection string for a container to your terminal:
+
+```bash
+mkdb creds get --name mydb
+```
+
+Copy it directly to your clipboard:
+
+```bash
+mkdb creds copy --name mydb
+```
+
+Append it to a `.env` file:
+
+```bash
+mkdb creds get --name mydb >> .env
+```
+
+## Password details
+
+When you create a database with authentication enabled, mkdb generates a random 12-character alphanumeric password. The password is displayed once at creation time and stored encrypted on disk using AES-256-GCM. You can always retrieve it later with `mkdb creds get`.
+
+## Rotating credentials
+
+Generate a new password for an existing container and update it in the database:
+
+```bash
+mkdb creds rotate --name mydb
+```
+
+mkdb generates a fresh 12-character password, updates the running database, re-encrypts and stores the new value, then prints the updated connection string.
+
+<Note>
+  Containers created with `--no-auth` do not have a password. Running `mkdb creds rotate` on an unauthenticated container will return an error. You cannot add authentication to a container after creation.
+</Note>

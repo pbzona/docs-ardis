@@ -1,0 +1,67 @@
+---
+title: "Container TTL and automatic expiration in mkdb"
+description: "mkdb containers expire after a configurable TTL (default: 2 hours). Set TTL at creation, extend running containers, and understand automatic cleanup behavior."
+sidebarTitle: "TTL"
+---
+
+Every mkdb container has a time to live (TTL) — a countdown that starts when the container is created and ends when the container is automatically removed. TTL exists to prevent stale development databases from accumulating on your machine. When a container's TTL expires, mkdb stops and deletes it along with its volume. You can configure the TTL at creation time and extend it later if you need more time.
+
+## Default TTL
+
+The default TTL is **2 hours**. If you do not specify `--ttl` when creating a database, mkdb sets the expiration to 2 hours from the time of creation.
+
+## Setting TTL at creation
+
+Pass `--ttl` with a number of hours when running `mkdb start`:
+
+```bash
+mkdb start --db postgres --name mydb --ttl 48
+```
+
+Common values:
+
+| Hours | Use case |
+|---|---|
+| `1` | Short-lived test database |
+| `2` | Default — quick development session |
+| `48` | Two-day development session |
+| `168` | One-week long-running database |
+
+## Extending TTL
+
+If a container is still running and you need more time before it expires, use `mkdb extend` to add hours to its remaining TTL:
+
+```bash
+mkdb extend --name mydb --hours 24
+```
+
+The `--hours` flag defaults to `1` if omitted:
+
+```bash
+# Extend by 1 hour
+mkdb extend --name mydb
+```
+
+## What happens when TTL expires
+
+When a container's TTL reaches zero:
+
+1. The container is stopped and removed from Docker.
+2. The volume is **permanently deleted**, including all data it contains.
+3. The container record is removed from the mkdb database.
+
+There is no grace period and no recovery after expiry.
+
+<Warning>
+  Expired containers have their volumes deleted automatically. If you need the data inside a container, run `mkdb extend` before the TTL reaches zero. Check remaining time with `mkdb info --name mydb`.
+</Warning>
+
+## Automatic cleanup
+
+mkdb runs a cleanup check automatically before every command you execute. You can also trigger cleanup manually:
+
+```bash
+mkdb cleanup
+```
+
+The cleanup command finds all expired containers, prompts you to select which ones to remove, then deletes each selected container and its volume.

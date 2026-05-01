@@ -1,0 +1,76 @@
+---
+title: "Stop and restart database containers with mkdb"
+description: "Use mkdb stop to pause a container while preserving its data, and mkdb restart to bring it back. Both support interactive and --name flag modes."
+sidebarTitle: "stop & restart"
+---
+
+`mkdb stop` and `mkdb restart` let you pause and resume database containers without losing data. Stopping a container preserves the volume so you can bring it back later. Restarting reconnects to that volume and resumes the container with the same credentials and configuration it had before.
+
+<Tabs>
+  <Tab title="stop">
+    ## mkdb stop
+
+    `mkdb stop` stops a running container and preserves its volume. The data remains intact — use `mkdb restart` to start it again.
+
+    ### Flags
+
+    <ParamField query="--name" type="string">
+      Name of the container to stop. When provided, mkdb skips the interactive selection menu and stops the named container directly.
+    </ParamField>
+
+    ### Examples
+
+    **Interactive mode — select from a list of running containers:**
+
+    ```bash
+    mkdb stop
+    ```
+
+    **Non-interactive mode — stop a named container directly:**
+
+    ```bash
+    mkdb stop --name mydb
+    ```
+  </Tab>
+  <Tab title="restart">
+    ## mkdb restart
+
+    `mkdb restart` starts a previously stopped container using its existing volume and credentials. If the underlying Docker container no longer exists (for example, it was removed externally), mkdb recreates it using the stored configuration.
+
+    ### Flags
+
+    <ParamField query="--name" type="string">
+      Name of the container to restart. When provided, mkdb skips the interactive selection menu and restarts the named container directly.
+    </ParamField>
+
+    ### Examples
+
+    **Interactive mode — select from a list of containers:**
+
+    ```bash
+    mkdb restart
+    ```
+
+    **Non-interactive mode — restart a named container directly:**
+
+    ```bash
+    mkdb restart --name mydb
+    ```
+  </Tab>
+</Tabs>
+
+## Stop and restart workflow
+
+A common pattern is to stop a container when you are not actively using it and restart it when you need it again — this preserves data while freeing up the port.
+
+```bash
+# Stop the container at the end of a session
+mkdb stop --name mydb
+
+# Restart it at the start of the next session
+mkdb restart --name mydb
+```
+
+<Note>
+  Stopping a container does not delete its volume or reset its TTL. If the container's TTL expires while it is stopped, the automatic cleanup process will still remove it. Use `mkdb extend` to add time to the TTL before stopping if needed.
+</Note>
